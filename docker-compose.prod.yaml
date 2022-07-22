@@ -1,0 +1,28 @@
+version: "3"
+
+services:
+  _python_base_image_build:
+    build:
+      context: .
+      dockerfile: Dockerfile.base
+    image: streamlit-playground-base
+    command: [ "echo", "build completed" ]
+
+  _python_app_image_build:
+    build:
+      context: .
+      dockerfile: Dockerfile.app
+    image: streamlit-playground-app
+    command: [ "echo", "build completed" ]
+
+  streamlit:
+    image: streamlit-playground-app
+    container_name: streamlit-app-prod
+    ports:
+      - "8501:8501"
+    networks:
+      - streamlit-playground
+
+networks:
+  streamlit-playground:
+    driver: bridge

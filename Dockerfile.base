@@ -1,0 +1,24 @@
+FROM python:3.8-slim-bullseye as base
+
+RUN apt update -y && apt upgrade -y && apt install curl -y
+RUN /usr/local/bin/python -m pip install --upgrade pip
+
+# Build image with poetry that exports the environment
+
+FROM base AS builder
+
+RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
+
+WORKDIR /app
+COPY . .
+
+RUN $HOME/.poetry/bin/poetry build
+
+# Build image with strictly necessary dependencies
+
+FROM base AS runtime
+
+WORKDIR /app
+RUN mkdir dist
+COPY --from=builder /app/dist ./dist
+RUN pip install /app/dist/*.whl
