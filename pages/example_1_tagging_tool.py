@@ -49,7 +49,9 @@ plots = [
     for i in range(10)
 ]
 
-st.line_chart(plots[st.session_state.stats.get_index()])
+plot_to_show = min(st.session_state.stats.get_index(), len(plots) -1)
+
+st.line_chart(plots[plot_to_show])
 
 buttons = [
     ("right", st.session_state.stats.inc_right),
@@ -83,3 +85,7 @@ with st.sidebar:
         stats_table.append({"Tag": label, "Value": value})
 
     st.table(pd.DataFrame(stats_table))
+
+    st.write(f"Tagging progress: {len(plots) - st.session_state.stats.get_index()} left.")
+    my_bar = st.progress(0)
+    my_bar.progress(st.session_state.stats.get_index() / len(plots))
