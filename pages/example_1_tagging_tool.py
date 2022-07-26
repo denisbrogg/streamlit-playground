@@ -2,90 +2,66 @@
 https://docs.streamlit.io/library/advanced-features/session-state#initialization
 """
 
-from dataclasses import dataclass, asdict
 import streamlit as st
 import pandas as pd
 import numpy as np
 
+from customlib.tagging import TaggingSession
 
-@dataclass
-class Stats:
-    right: int = 0
-    wrong: int = 0
-    dk: int = 0
-    bad: int = 0
 
-    def inc_right(self):
-        self.right += 1
-
-    def inc_wrong(self):
-        self.wrong += 1
-
-    def inc_dk(self):
-        self.dk += 1
-
-    def inc_bad(self):
-        self.bad += 1
-
-    def get_index(self):
-        return self.right + self.wrong + self.dk + self.bad
 
 
 if "stats" not in st.session_state:
-    st.session_state.stats = Stats()
-
+    st.session_state.stats = TaggingSession()
 
 
 st.title("Tagging Tool Example")
-
 st.write("## User")
 
-user = st.selectbox('Who is tagging?', tuple([f"User {i}" for i in range(5)]))
+user = st.selectbox("Who is tagging?", tuple([f"User {i}" for i in range(5)]))
 
 st.write("## Plot")
 
-plots = [
-    np.sin(np.arange(0, 100, 0.1) * np.sqrt(i)) * i
-    for i in range(10)
-]
+plots = [np.sin(np.arange(0, 100, 0.1) * np.sqrt(i)) * i for i in range(10)]
 
-plot_to_show = min(st.session_state.stats.get_index(), len(plots) -1)
+plot_to_show = min(st.session_state.stats.sum_tags(), len(plots) - 1)
 
 st.line_chart(plots[plot_to_show])
 
-buttons = [
-    ("right", st.session_state.stats.inc_right),
-    ("wrong", st.session_state.stats.inc_wrong),
-    ("dk", st.session_state.stats.inc_dk),
-    ("bad", st.session_state.stats.inc_bad),
-]
+
 
 st.write("## Command Buttons")
 
-cols_buttons = st.columns(len(buttons))
+cols_buttons = st.columns(len(st.session_state.stats.tags))
 
-for col, button in zip(cols_buttons, buttons):
+for col, tag in zip(cols_buttons, st.session_state.stats.tags):
     with col:
-        st.button(button[0], on_click=button[1])
+        st.button(tag, on_click=st.session_state.stats.inc_tags, args=(tag))
 
 
 with st.sidebar:
 
+    st.write("## Session Info")
+
     st.write("**User tagging:**", user)
+
+    st.write(
+        f"**Tagging progress:** {len(plots) - st.session_state.stats.sum_tags()} left."
+    )
+    my_bar = st.progress(0)
+    my_bar.progress(st.session_state.stats.sum_tags() / len(plots))
+
+
 
     st.write("## Session Stats")
 
-
     stats_table = []
 
-    for button in buttons:
-        label: str = button[0]
-        value: int = asdict(st.session_state.stats)[button[0]]
-
+    for tag in st.session_state.stats.tags:
+        label: str = tag
+        value: int = st.session_state.stats[tag]
         stats_table.append({"Tag": label, "Value": value})
 
     st.table(pd.DataFrame(stats_table))
 
-    st.write(f"Tagging progress: {len(plots) - st.session_state.stats.get_index()} left.")
-    my_bar = st.progress(0)
-    my_bar.progress(st.session_state.stats.get_index() / len(plots))
+    
