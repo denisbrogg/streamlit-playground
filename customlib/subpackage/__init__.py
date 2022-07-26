@@ -1,1 +1,0 @@
-SUBPACKAGE_VARIABLE = "yolo"

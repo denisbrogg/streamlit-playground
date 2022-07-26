@@ -1,7 +1,5 @@
 import streamlit as st
 
-from customlib.subpackage import SUBPACKAGE_VARIABLE
-
 """
 # Streamlit playground
 
