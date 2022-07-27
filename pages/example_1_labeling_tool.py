@@ -94,11 +94,19 @@ with st.sidebar:
 
     csv = st.session_state.session_handler.get_session_labels().to_csv().encode('utf-8')
 
-    st.download_button(
-        label="Download data as CSV",
-        data=csv,
-        file_name='session_labels.csv',
-        mime='text/csv',
-    )
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.download_button(
+            label="Download data as CSV",
+            data=csv,
+            file_name='session_labels.csv',
+            mime='text/csv',
+        )
+    with col2:
+        def save_file_to_output():
+            st.session_state.session_handler.get_session_labels().to_csv("out/label_session.csv")
+        st.button("Save session to output folder", on_click=save_file_to_output)
+
 
     
