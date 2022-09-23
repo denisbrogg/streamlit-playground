@@ -1,26 +1,13 @@
 """_summary_ """
 
-import numpy as np
 import streamlit as st
+import pandas as pd
+from customlib.sqlalchemy import PGConfig, Database, Tag
 
-
-def get_engine(c: PGConfig):
-    url: str = str(c)
-    if not database_exists(url):
-        create_database(url)
-    return create_engine(url, pool_size=50, echo=False)
-
-
-config = PGConfig()
-engine = get_engine(config)
-session = sessionmaker(bind=engine)()
-
-Base.metadata.create_all(engine)
-
+config: PGConfig = PGConfig()
+db: Database = Database(config)
 
 st.title("SQL DB Feed Demo")
-st.write(PGConfig())
-st.write(session)
 
 cf, cc, cp, cu, ct = st.columns(5)
 
@@ -41,7 +28,13 @@ def write_tag():
         flight=flight, condition=condition, parameter=param, user=user, tag=tag
     )
     print(new_tag)
-    session.add(new_tag)
+    db.insert(new_tag)
 
 
-button = st.button("Write on DB", on_click=write_tag())
+button = st.button("Write on DB", on_click=write_tag)
+
+tags = db.select()
+tags_table = pd.DataFrame([{c: tag.__dict__[c] for c in Tag.__table__.columns.keys()} for tag in tags])
+
+st.table(tags_table)
+    

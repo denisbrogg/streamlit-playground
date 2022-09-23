@@ -1,8 +1,9 @@
-from sqlalchemy import Column, Date, Integer, String
+from sqlalchemy import Column, DateTime, Integer, String, Identity
+from sqlalchemy.sql import func
 from sqlalchemy.orm import declarative_base
 
-Base = declarative_base()
 
+Base = declarative_base()
 
 class Tag(Base):
     """Single row of the database"""
@@ -10,9 +11,11 @@ class Tag(Base):
     __tablename__ = "tags"
 
     id = Column(Integer, primary_key=True)
-    timestamp: Column(Date)
-    flight: Column(String(10))
-    condition: Column(String(10))
-    parameter: Column(String(10))
-    user: Column(String(10))
-    tag: Column(String(10))
+    time = Column(DateTime(timezone=False), server_default=func.now(), onupdate=func.now())
+    flight = Column(String)
+    condition = Column(String)
+    parameter = Column(String)
+    user = Column(String)
+    tag = Column(String)
+
+
