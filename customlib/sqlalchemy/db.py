@@ -30,3 +30,8 @@ class Database:
         stmt = select(Tag)
         results = self.session.scalars(stmt)
         return results
+
+    def select_by_user(self, user: str) -> Optional[List[Tag]]:
+        stmt = select(Tag).where(Tag.user == user)
+        results = self.session.scalars(stmt)
+        return results
